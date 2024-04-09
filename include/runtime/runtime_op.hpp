@@ -25,6 +25,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -87,7 +88,28 @@ struct RuntimeOperatorBase {
 
   /// Operator attributes like weights
   std::map<std::string, std::shared_ptr<RuntimeAttribute>> attribute;
+
+  bool has_parameter(const std::string& param_name);
+
+  bool has_attribute(const std::string& attr_name);
 };
+
+template <typename T>
+bool RuntimeOperatorBase<T>::has_attribute(const std::string& attr_name) {
+  return false;
+}
+
+template <typename T>
+bool RuntimeOperatorBase<T>::has_parameter(const std::string& param_name) {
+  if (this->params.empty()) {
+    return false;
+  }
+  if (this->params.find(param_name) == this->params.end()) {
+    return false;
+  } else {
+    return true;
+  }
+}
 
 using RuntimeOperator = RuntimeOperatorBase<float>;
 
