@@ -96,7 +96,13 @@ struct RuntimeOperatorBase {
 
 template <typename T>
 bool RuntimeOperatorBase<T>::has_attribute(const std::string& attr_name) {
-  return false;
+  if (this->attribute.empty()) {
+    return false;
+  }
+  if (this->attribute.find(attr_name) == this->attribute.end()) {
+    return false;
+  }
+  return true;
 }
 
 template <typename T>
