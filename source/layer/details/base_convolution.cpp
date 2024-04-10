@@ -312,7 +312,7 @@ StatusCode BaseConvolutionLayer::CreateInstance(const std::shared_ptr<RuntimeOpe
   }
 
   if (op->type == "nn.Conv2d") {
-    if (!op->has_parameter("padding_mode")) {
+    if (op->has_parameter("padding_mode")) {
       auto padding_mode =
           std::dynamic_pointer_cast<RuntimeParameterString>(params.at("padding_mode"));
       if (padding_mode == nullptr) {
@@ -364,7 +364,7 @@ StatusCode BaseConvolutionLayer::CreateInstance(const std::shared_ptr<RuntimeOpe
   uint32_t output_padding_h = 0;
   uint32_t output_padding_w = 0;
   if (op->type == "nn.ConvTranspose2d") {
-    if (!op->has_parameter("output_padding")) {
+    if (op->has_parameter("output_padding")) {
       auto output_padding_arr =
           std::dynamic_pointer_cast<RuntimeParameterIntArray>(params.at("output_padding"));
       if (!output_padding_arr) {
