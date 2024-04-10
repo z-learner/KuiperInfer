@@ -144,7 +144,7 @@ StatusCode LinearLayer::CreateInstance(const std::shared_ptr<RuntimeOperator>& o
     return StatusCode::kParseParameterError;
   }
 
-  if (op->has_parameter("bias")) {
+  if (!op->has_parameter("bias")) {
     LOG(ERROR) << "Can not find the use bias parameter in the parameter list.";
     return StatusCode::kParseParameterError;
   }
@@ -160,13 +160,13 @@ StatusCode LinearLayer::CreateInstance(const std::shared_ptr<RuntimeOperator>& o
     return StatusCode::kParseWeightError;
   }
 
-  if (op->has_attribute("weight")) {
+  if (!op->has_attribute("weight")) {
     LOG(ERROR) << "Can not find the weight parameter in the parameter list.";
     return StatusCode::kParseWeightError;
   }
 
   if (use_bias_param->value) {
-    if (op->has_attribute("bias")) {
+    if (!op->has_attribute("bias")) {
       LOG(ERROR) << "Can not find the bias parameter in the parameter list.";
       return StatusCode::kParseWeightError;
     }
