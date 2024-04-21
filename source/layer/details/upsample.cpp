@@ -122,18 +122,13 @@ StatusCode UpSampleLayer::Forward(const std::vector<std::shared_ptr<Tensor<float
             const uint32_t dest_w = w * scale_w;
             const float* input_col_ptr = input_channel.colptr(w);
             for (uint32_t sw = 0; sw < scale_w; ++sw) {
-              if (dest_w + sw >= output_w) {
-                continue;
-              }
               float* output_col_ptr = output_channel.colptr(dest_w + sw);
               for (uint32_t h = 0; h < input_h; ++h) {
                 const uint32_t dest_h = h * scale_h;
                 float* output_ptr = output_col_ptr + dest_h;
                 const float input_value = *(input_col_ptr + h);
                 for (uint32_t sh = 0; sh < scale_h; ++sh) {
-                  if (dest_h + sh < output_h) {
-                    *(output_ptr + sh) = input_value;
-                  }
+                  *(output_ptr + sh) = input_value;
                 }
               }
             }
