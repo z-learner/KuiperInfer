@@ -119,12 +119,12 @@ StatusCode FlattenLayer::CreateInstance(const std::shared_ptr<RuntimeOperator>& 
     return StatusCode::kParseParameterError;
   }
 
-  if (params.find("end_dim") == params.end()) {
+  if (!op->has_parameter("end_dim")) {
     LOG(ERROR) << "Can not find the dimension parameter";
     return StatusCode::kParseParameterError;
   }
 
-  if (params.find("start_dim") == params.end()) {
+  if (!op->has_parameter("start_dim")) {
     LOG(ERROR) << "Can not find the dimension parameter";
     return StatusCode::kParseParameterError;
   }
