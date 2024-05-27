@@ -25,6 +25,7 @@
 #include "base_convolution.hpp"
 #include "convolution.hpp"
 #include "deconvolution.hpp"
+#include "layer/abstract/layer.hpp"
 #include "status_code.hpp"
 namespace kuiper_infer {
 BaseConvolutionLayer::BaseConvolutionLayer(ConvType conv_type, uint32_t output_channel,
@@ -93,81 +94,16 @@ void BaseConvolutionLayer::AddBias(arma::fmat& output, uint32_t bias_index) cons
 
 StatusCode BaseConvolutionLayer::Forward(const std::vector<std::shared_ptr<Tensor<float>>>& inputs,
                                          std::vector<std::shared_ptr<Tensor<float>>>& outputs) {
-  if (inputs.empty()) {
-    LOG(ERROR) << "The input tensor array in the convolution layer is empty";
-    return StatusCode::kInferInputsEmpty;
-  }
+  StatusCode check_code = Check(inputs, outputs);
 
-  if (outputs.empty()) {
-    LOG(ERROR) << "The output tensor array in the convolution layer is empty";
-    return StatusCode::kInferOutputsEmpty;
-  }
-
-  if (inputs.size() != outputs.size()) {
-    LOG(ERROR) << "The input and output tensor array size of the convolution "
-                  "layer do not match";
-    return StatusCode::kInferDimMismatch;
-  }
-
-  if (weights_.empty()) {
-    LOG(ERROR) << "The number of kernel matrix in the convolution layer should "
-                  "be greater than zero";
-    return StatusCode::kInferParameterError;
-  }
-
-  if (this->use_bias_ && this->bias_.size() != this->weights_.size()) {
-    LOG(ERROR) << "The number of kernel matrix and bias matrix do not match";
-    return StatusCode::kInferParameterError;
-  }
-
-  if (!stride_h_ || !stride_w_) {
-    LOG(ERROR) << "The stride in the convolution layer should be greater "
-                  "than zero";
-    return StatusCode::kInferParameterError;
-  }
-
-  if (!dilation_h_ || !dilation_w_) {
-    LOG(ERROR) << "The dilation in the convolution layer should be greater "
-                  "than zero";
-    return StatusCode::kInferParameterError;
-  }
-
-  if (!groups_) {
-    LOG(ERROR) << "The group number in the convolution layer should be "
-                  "greater than zero ";
-    return StatusCode::kInferParameterError;
-  }
-
-  if (conv_type_ == ConvType::kOpConv) {
-    if (output_padding_h_ != 0 || output_padding_w_ != 0) {
-      LOG(ERROR) << "The output padding in the convolution layer should be zero ";
-      return StatusCode::kInferParameterError;
-    }
+  if (check_code != StatusCode::kSuccess) {
+    return check_code;
   }
 
   const uint32_t kernel_count = this->weights_.size();
-  if (!kernel_count) {
-    LOG(ERROR) << "The size of kernel matrix in the convolution layer should be greater "
-                  "than zero";
-    return StatusCode::kInferParameterError;
-  }
-
   const uint32_t kernel_h = this->weights_.at(0)->rows();
   const uint32_t kernel_w = this->weights_.at(0)->cols();
   const uint32_t kernel_channel = this->weights_.at(0)->channels();
-
-  if (!kernel_h || !kernel_w || !kernel_channel) {
-    LOG(ERROR) << "The size of kernel matrix in the convolution layer should be greater "
-                  "than zero";
-    return StatusCode::kInferParameterError;
-  }
-
-  for (uint32_t k = 0; k < kernel_count; ++k) {
-    const std::shared_ptr<Tensor<float>>& kernel = this->weights_.at(k);
-    CHECK(kernel->rows() == kernel_h);
-    CHECK(kernel->cols() == kernel_w);
-    CHECK(kernel->channels() == kernel_channel);
-  }
 
   if (kernel_matrix_arr_.size() != kernel_count) {
     InitIm2ColWeight();
@@ -440,6 +376,86 @@ StatusCode BaseConvolutionLayer::CreateInstance(const std::shared_ptr<RuntimeOpe
   CHECK(conv_layer_derived != nullptr);
   conv_layer_derived->InitIm2ColWeight();
 
+  return StatusCode::kSuccess;
+}
+
+StatusCode BaseConvolutionLayer::Check(const std::vector<sftensor>& inputs,
+                                       const std::vector<sftensor>& outputs) {
+  if (inputs.empty()) {
+    LOG(ERROR) << "The input tensor array in the convolution layer is empty";
+    return StatusCode::kInferInputsEmpty;
+  }
+
+  if (outputs.empty()) {
+    LOG(ERROR) << "The output tensor array in the convolution layer is empty";
+    return StatusCode::kInferOutputsEmpty;
+  }
+
+  if (inputs.size() != outputs.size()) {
+    LOG(ERROR) << "The input and output tensor array size of the convolution "
+                  "layer do not match";
+    return StatusCode::kInferDimMismatch;
+  }
+
+  if (weights_.empty()) {
+    LOG(ERROR) << "The number of kernel matrix in the convolution layer should "
+                  "be greater than zero";
+    return StatusCode::kInferParameterError;
+  }
+
+  if (this->use_bias_ && this->bias_.size() != this->weights_.size()) {
+    LOG(ERROR) << "The number of kernel matrix and bias matrix do not match";
+    return StatusCode::kInferParameterError;
+  }
+
+  if (!stride_h_ || !stride_w_) {
+    LOG(ERROR) << "The stride in the convolution layer should be greater "
+                  "than zero";
+    return StatusCode::kInferParameterError;
+  }
+
+  if (!dilation_h_ || !dilation_w_) {
+    LOG(ERROR) << "The dilation in the convolution layer should be greater "
+                  "than zero";
+    return StatusCode::kInferParameterError;
+  }
+
+  if (!groups_) {
+    LOG(ERROR) << "The group number in the convolution layer should be "
+                  "greater than zero ";
+    return StatusCode::kInferParameterError;
+  }
+
+  if (conv_type_ == ConvType::kOpConv) {
+    if (output_padding_h_ != 0 || output_padding_w_ != 0) {
+      LOG(ERROR) << "The output padding in the convolution layer should be zero ";
+      return StatusCode::kInferParameterError;
+    }
+  }
+
+  const uint32_t kernel_count = this->weights_.size();
+  if (!kernel_count) {
+    LOG(ERROR) << "The size of kernel matrix in the convolution layer should be greater "
+                  "than zero";
+    return StatusCode::kInferParameterError;
+  }
+
+  const uint32_t kernel_h = this->weights_.at(0)->rows();
+  const uint32_t kernel_w = this->weights_.at(0)->cols();
+  const uint32_t kernel_channel = this->weights_.at(0)->channels();
+
+  if (!kernel_h || !kernel_w || !kernel_channel) {
+    LOG(ERROR) << "The size of kernel matrix in the convolution layer should be greater "
+                  "than zero";
+    return StatusCode::kInferParameterError;
+  }
+
+  for (uint32_t k = 0; k < kernel_count; ++k) {
+    const std::shared_ptr<Tensor<float>>& kernel = this->weights_.at(k);
+    CHECK(kernel->rows() == kernel_h);
+    CHECK(kernel->cols() == kernel_w);
+    CHECK(kernel->channels() == kernel_channel);
+  }
   return StatusCode::kSuccess;
 }
 
