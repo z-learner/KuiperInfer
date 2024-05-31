@@ -43,7 +43,7 @@ enum class StatusCode {
 
   kInferInputsEmpty = 1,
   kInferOutputsEmpty = 2,
-  kInferParameterError = 3,
+  kInferInternalError = 3,
   kInferDimMismatch = 4,
 
   kFunctionNotImplement = 5,

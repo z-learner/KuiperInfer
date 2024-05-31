@@ -60,12 +60,12 @@ StatusCode FlattenLayer::Forward(const std::vector<std::shared_ptr<Tensor<float>
 
   if (end_dim <= start_dim) {
     LOG(ERROR) << "The end dim must greater than start dim";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (end_dim > 3 || start_dim < 1) {
     LOG(ERROR) << "The end dim must less than two and start dim must greater than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   const uint32_t batch_size = inputs.size();

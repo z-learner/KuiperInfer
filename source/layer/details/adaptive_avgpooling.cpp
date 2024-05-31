@@ -54,7 +54,7 @@ StatusCode AdaptiveAveragePoolingLayer::Forward(
   if (!output_h_ || !output_w_) {
     LOG(ERROR) << "The output_h and output_w in the adaptive pooling layer should be "
                   "greater than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   const uint32_t batch = inputs.size();

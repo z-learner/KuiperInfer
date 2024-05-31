@@ -202,22 +202,22 @@ StatusCode LinearLayer::Check(const std::vector<sftensor>& inputs,
 
   if (this->weights_.empty()) {
     LOG(ERROR) << "The weight tensor in the linear layer is empty";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   } else {
     if (this->use_bias_ && this->weights_.size() != this->bias_.size()) {
       LOG(ERROR) << "The size of the weight and bias tensor do not match";
-      return StatusCode::kInferParameterError;
+      return StatusCode::kInferInternalError;
     }
   }
 
   if (weights_.size() != 1) {
     LOG(ERROR) << "Need one weight tensor in the linear layer";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (use_bias_ && this->bias_.size() != 1) {
     LOG(ERROR) << "Need one bias tensor in the linear layer";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
   return StatusCode::kSuccess;
 }

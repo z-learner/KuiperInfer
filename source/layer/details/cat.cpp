@@ -111,7 +111,7 @@ StatusCode CatLayer::Check(const std::vector<sftensor>& inputs,
 
   if (dim_ != 1 && dim_ != -3) {
     LOG(ERROR) << "The dimension parameter of cat layer is error";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   const uint32_t output_size = outputs.size();

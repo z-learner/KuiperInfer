@@ -210,13 +210,13 @@ StatusCode MaxPoolingLayer::Check(const std::vector<sftensor>& inputs,
   if (!pooling_size_h_ || !pooling_size_w_) {
     LOG(ERROR) << "The pooling size in the maxpooling layer should be greater "
                   "than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (!stride_w_ || !stride_h_) {
     LOG(ERROR) << "The stride in the maxpooling layer should be greater "
                   "than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
   return StatusCode::kSuccess;
 }

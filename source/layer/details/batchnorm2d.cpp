@@ -49,19 +49,19 @@ StatusCode BatchNorm2dLayer::Forward(const std::vector<std::shared_ptr<Tensor<fl
   if (mean_value_size != bias_value_size) {
     LOG(ERROR) << "The batchnorm2d layer do not have the same number of mean "
                   "values and bias values";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (this->affine_weight_.size() != this->weights().size()) {
     LOG(ERROR) << "The batchnorm2d layer do not have the same number of mean "
                   "values and affine weight";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (this->affine_bias_.size() != this->affine_weight_.size()) {
     LOG(ERROR) << "The batchnorm2d layer do not have the same number of affine "
                   "weight and affine bias";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
   const uint32_t batch_size = inputs.size();
 #pragma omp parallel for num_threads(batch_size)

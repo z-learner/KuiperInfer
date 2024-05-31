@@ -402,36 +402,36 @@ StatusCode BaseConvolutionLayer::Check(const std::vector<sftensor>& inputs,
   if (weights_.empty()) {
     LOG(ERROR) << "The number of kernel matrix in the convolution layer should "
                   "be greater than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (this->use_bias_ && this->bias_.size() != this->weights_.size()) {
     LOG(ERROR) << "The number of kernel matrix and bias matrix do not match";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (!stride_h_ || !stride_w_) {
     LOG(ERROR) << "The stride in the convolution layer should be greater "
                   "than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (!dilation_h_ || !dilation_w_) {
     LOG(ERROR) << "The dilation in the convolution layer should be greater "
                   "than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (!groups_) {
     LOG(ERROR) << "The group number in the convolution layer should be "
                   "greater than zero ";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   if (conv_type_ == ConvType::kOpConv) {
     if (output_padding_h_ != 0 || output_padding_w_ != 0) {
       LOG(ERROR) << "The output padding in the convolution layer should be zero ";
-      return StatusCode::kInferParameterError;
+      return StatusCode::kInferInternalError;
     }
   }
 
@@ -439,7 +439,7 @@ StatusCode BaseConvolutionLayer::Check(const std::vector<sftensor>& inputs,
   if (!kernel_count) {
     LOG(ERROR) << "The size of kernel matrix in the convolution layer should be greater "
                   "than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   const uint32_t kernel_h = this->weights_.at(0)->rows();
@@ -449,7 +449,7 @@ StatusCode BaseConvolutionLayer::Check(const std::vector<sftensor>& inputs,
   if (!kernel_h || !kernel_w || !kernel_channel) {
     LOG(ERROR) << "The size of kernel matrix in the convolution layer should be greater "
                   "than zero";
-    return StatusCode::kInferParameterError;
+    return StatusCode::kInferInternalError;
   }
 
   for (uint32_t k = 0; k < kernel_count; ++k) {
