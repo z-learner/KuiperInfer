@@ -44,32 +44,9 @@ MaxPoolingLayer::MaxPoolingLayer(uint32_t padding_h, uint32_t padding_w, uint32_
 
 StatusCode MaxPoolingLayer::Forward(const std::vector<std::shared_ptr<Tensor<float>>>& inputs,
                                     std::vector<std::shared_ptr<Tensor<float>>>& outputs) {
-  if (inputs.empty()) {
-    LOG(ERROR) << "The input tensor array in the maxpooling layer is empty";
-    return StatusCode::kInferInputsEmpty;
-  }
-
-  if (outputs.empty()) {
-    LOG(ERROR) << "The output tensor array in the maxpooling layer is empty";
-    return StatusCode::kInferOutputsEmpty;
-  }
-
-  if (inputs.size() != outputs.size()) {
-    LOG(ERROR) << "The input and output tensor array size of the maxpooling "
-                  "layer do not match";
-    return StatusCode::kInferDimMismatch;
-  }
-
-  if (!pooling_size_h_ || !pooling_size_w_) {
-    LOG(ERROR) << "The pooling size in the maxpooling layer should be greater "
-                  "than zero";
-    return StatusCode::kInferParameterError;
-  }
-
-  if (!stride_w_ || !stride_h_) {
-    LOG(ERROR) << "The stride in the maxpooling layer should be greater "
-                  "than zero";
-    return StatusCode::kInferParameterError;
+  StatusCode check_status = Check(inputs, outputs);
+  if (check_status != StatusCode::kSuccess) {
+    return check_status;
   }
 
   const uint32_t batch = inputs.size();
@@ -79,16 +56,11 @@ StatusCode MaxPoolingLayer::Forward(const std::vector<std::shared_ptr<Tensor<flo
 #pragma omp parallel for num_threads(batch)
   for (uint32_t i = 0; i < batch; ++i) {
     const std::shared_ptr<Tensor<float>>& input_data = inputs.at(i);
-    CHECK(input_data != nullptr && !input_data->empty())
-        << "The input tensor array in the max pooling layer has an "
-           "empty tensor "
-        << i << "th";
 
     const uint32_t input_h = input_data->rows();
     const uint32_t input_w = input_data->cols();
     const uint32_t input_padded_h = input_data->rows() + 2 * padding_h_;
     const uint32_t input_padded_w = input_data->cols() + 2 * padding_w_;
-
     const uint32_t input_c = input_data->channels();
 
     const uint32_t output_h =
@@ -101,7 +73,6 @@ StatusCode MaxPoolingLayer::Forward(const std::vector<std::shared_ptr<Tensor<flo
       output_data = std::make_shared<Tensor<float>>(input_c, output_h, output_w);
       outputs.at(i) = output_data;
     }
-
     CHECK(output_data->rows() == output_h && output_data->cols() == output_w &&
           output_data->channels() == input_c)
         << "The output tensor array in the max pooling layer "
@@ -207,6 +178,46 @@ StatusCode MaxPoolingLayer::CreateInstance(const std::shared_ptr<RuntimeOperator
                                                 kernel_values.at(0), kernel_values.at(1),
                                                 stride_values.at(0), stride_values.at(1));
 
+  return StatusCode::kSuccess;
+}
+
+StatusCode MaxPoolingLayer::Check(const std::vector<sftensor>& inputs,
+                                  const std::vector<sftensor>& outputs) {
+  if (inputs.empty()) {
+    LOG(ERROR) << "The input tensor array in the maxpooling layer is empty";
+    return StatusCode::kInferInputsEmpty;
+  }
+
+  for (const auto& input_data : inputs) {
+    if (input_data == nullptr || input_data->empty()) {
+      LOG(ERROR) << "The input tensor array in the maxpooling layer has an "
+                    "empty tensor ";
+      return StatusCode::kInferInputsEmpty;
+    }
+  }
+
+  if (outputs.empty()) {
+    LOG(ERROR) << "The output tensor array in the maxpooling layer is empty";
+    return StatusCode::kInferOutputsEmpty;
+  }
+
+  if (inputs.size() != outputs.size()) {
+    LOG(ERROR) << "The input and output tensor array size of the maxpooling "
+                  "layer do not match";
+    return StatusCode::kInferDimMismatch;
+  }
+
+  if (!pooling_size_h_ || !pooling_size_w_) {
+    LOG(ERROR) << "The pooling size in the maxpooling layer should be greater "
+                  "than zero";
+    return StatusCode::kInferParameterError;
+  }
+
+  if (!stride_w_ || !stride_h_) {
+    LOG(ERROR) << "The stride in the maxpooling layer should be greater "
+                  "than zero";
+    return StatusCode::kInferParameterError;
+  }
   return StatusCode::kSuccess;
 }
 

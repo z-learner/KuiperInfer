@@ -95,7 +95,6 @@ void BaseConvolutionLayer::AddBias(arma::fmat& output, uint32_t bias_index) cons
 StatusCode BaseConvolutionLayer::Forward(const std::vector<std::shared_ptr<Tensor<float>>>& inputs,
                                          std::vector<std::shared_ptr<Tensor<float>>>& outputs) {
   StatusCode check_code = Check(inputs, outputs);
-
   if (check_code != StatusCode::kSuccess) {
     return check_code;
   }
@@ -114,11 +113,6 @@ StatusCode BaseConvolutionLayer::Forward(const std::vector<std::shared_ptr<Tenso
 #pragma omp parallel for num_threads(batch_size)
   for (uint32_t i = 0; i < batch_size; ++i) {
     const std::shared_ptr<Tensor<float>>& input = inputs.at(i);
-    CHECK(input != nullptr && !input->empty())
-        << "The input tensor array in the convolution layer has an empty  "
-           "tensor "
-        << i << " th";
-
     const uint32_t input_h = input->rows();
     const uint32_t input_w = input->cols();
     const uint32_t input_c = input->channels();
@@ -384,6 +378,14 @@ StatusCode BaseConvolutionLayer::Check(const std::vector<sftensor>& inputs,
   if (inputs.empty()) {
     LOG(ERROR) << "The input tensor array in the convolution layer is empty";
     return StatusCode::kInferInputsEmpty;
+  }
+
+  for (const auto& input_data : inputs) {
+    if (input_data == nullptr || input_data->empty()) {
+      LOG(ERROR) << "The input tensor array in the maxpooling layer has an "
+                    "empty tensor ";
+      return StatusCode::kInferInputsEmpty;
+    }
   }
 
   if (outputs.empty()) {
