@@ -129,17 +129,17 @@ StatusCode LinearLayer::CreateInstance(const std::shared_ptr<RuntimeOperator>& o
   const auto& params = op->params;
   if (params.empty()) {
     LOG(ERROR) << "The operator parameter in the linear layer is empty.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   if (!op->has_parameter("bias")) {
     LOG(ERROR) << "Can not find the use bias parameter in the parameter list.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
   auto use_bias_param = std::dynamic_pointer_cast<RuntimeParameterBool>(params.at("bias"));
   if (use_bias_param == nullptr) {
     LOG(ERROR) << "Can not find the use bias parameter in the parameter list.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   const auto& attr = op->attribute;
@@ -202,22 +202,22 @@ StatusCode LinearLayer::Check(const std::vector<sftensor>& inputs,
 
   if (this->weights_.empty()) {
     LOG(ERROR) << "The weight tensor in the linear layer is empty";
-    return StatusCode::kInferInternalError;
+    return StatusCode::kInferParamError;
   } else {
     if (this->use_bias_ && this->weights_.size() != this->bias_.size()) {
       LOG(ERROR) << "The size of the weight and bias tensor do not match";
-      return StatusCode::kInferInternalError;
+      return StatusCode::kInferParamError;
     }
   }
 
   if (weights_.size() != 1) {
     LOG(ERROR) << "Need one weight tensor in the linear layer";
-    return StatusCode::kInferInternalError;
+    return StatusCode::kInferParamError;
   }
 
   if (use_bias_ && this->bias_.size() != 1) {
     LOG(ERROR) << "Need one bias tensor in the linear layer";
-    return StatusCode::kInferInternalError;
+    return StatusCode::kInferParamError;
   }
   return StatusCode::kSuccess;
 }

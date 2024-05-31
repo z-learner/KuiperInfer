@@ -61,7 +61,7 @@ StatusCode ViewLayer::Forward(const std::vector<std::shared_ptr<Tensor<float>>>&
     if (dynamic_index != -1 && dynamic_index != shapes_.size() - 1) {
       LOG(ERROR) << "-1 appears in the wrong dimension, it can only be on the last "
                     "dimension";
-      return StatusCode::kInferInternalError;
+      return StatusCode::kInferParamError;
     } else {
       if (dynamic_index != -1) {
         CHECK(total_size >= current_size);
@@ -87,18 +87,18 @@ StatusCode ViewLayer::CreateInstance(const std::shared_ptr<RuntimeOperator>& op,
   const auto& params = op->params;
   if (params.empty()) {
     LOG(ERROR) << "The operator parameter in the view layer is empty.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   if (params.find("shape") == params.end()) {
     LOG(ERROR) << "View layer missing shape";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   auto shape = std::dynamic_pointer_cast<RuntimeParameterIntArray>(params.at("shape"));
   if (!shape) {
     LOG(ERROR) << "View layer missing shape";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
   view_layer = std::make_shared<ViewLayer>(shape->value);
   return StatusCode::kSuccess;
@@ -128,7 +128,7 @@ StatusCode ViewLayer::Check(const std::vector<sftensor>& inputs,
   const uint32_t batch_size = inputs.size();
   if (shapes_.empty() || (shapes_.front() != -1 && shapes_.front() != batch_size)) {
     LOG(ERROR) << "The shape parameter in the view layer has an incorrectly size! ";
-    return StatusCode::kInferInternalError;
+    return StatusCode::kInferParamError;
   }
   return StatusCode::kSuccess;
 }

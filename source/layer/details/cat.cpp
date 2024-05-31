@@ -73,18 +73,18 @@ StatusCode CatLayer::CreateInstance(const std::shared_ptr<RuntimeOperator>& op,
   const auto& params = op->params;
   if (params.empty()) {
     LOG(ERROR) << "The operator parameter in the cat layer is empty.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   if (params.find("dim") == params.end()) {
     LOG(ERROR) << "Can not find the dim parameter";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   auto dim_param = std::dynamic_pointer_cast<RuntimeParameterInt>(params.at("dim"));
   if (!dim_param) {
     LOG(ERROR) << "Can not find the dim parameter";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
   const int32_t dim = dim_param->value;
   cat_layer = std::make_shared<CatLayer>(dim);
@@ -111,7 +111,7 @@ StatusCode CatLayer::Check(const std::vector<sftensor>& inputs,
 
   if (dim_ != 1 && dim_ != -3) {
     LOG(ERROR) << "The dimension parameter of cat layer is error";
-    return StatusCode::kInferInternalError;
+    return StatusCode::kInferParamError;
   }
 
   const uint32_t output_size = outputs.size();

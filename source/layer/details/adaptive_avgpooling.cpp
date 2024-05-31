@@ -54,7 +54,7 @@ StatusCode AdaptiveAveragePoolingLayer::Forward(
   if (!output_h_ || !output_w_) {
     LOG(ERROR) << "The output_h and output_w in the adaptive pooling layer should be "
                   "greater than zero";
-    return StatusCode::kInferInternalError;
+    return StatusCode::kInferParamError;
   }
 
   const uint32_t batch = inputs.size();
@@ -129,20 +129,20 @@ StatusCode AdaptiveAveragePoolingLayer::CreateInstance(const std::shared_ptr<Run
   const auto& params = op->params;
   if (params.empty()) {
     LOG(ERROR) << "The operator parameter in the adaptive pooling layer is empty.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   auto output_size_param =
       std::dynamic_pointer_cast<RuntimeParameterIntArray>(params.at("output_size"));
   if (!output_size_param) {
     LOG(ERROR) << "Can not find the output size parameter in the parameter list.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
 
   const auto& output_size_arr = output_size_param->value;
   if (output_size_arr.size() != 2) {
     LOG(ERROR) << "The dimension of the output size parameter should be 2.";
-    return StatusCode::kParseParameterError;
+    return StatusCode::kParseParamError;
   }
   avg_layer =
       std::make_shared<AdaptiveAveragePoolingLayer>(output_size_arr.at(0), output_size_arr.at(1));
