@@ -147,10 +147,11 @@ StatusCode AdaptiveAveragePoolingLayer::Check(const std::vector<sftensor>& input
   }
 
   for (const auto& input_data : inputs) {
-    if (input_data == nullptr || input_data->empty())
+    if (input_data == nullptr || input_data->empty()) {
       LOG(ERROR) << "The input tensor array in the adaptive pooling layer has an empty "
                     "tensor ";
-    return StatusCode::kInferInputsEmpty;
+      return StatusCode::kInferInputsEmpty;
+    }
   }
 
   if (!output_h_ || !output_w_) {
