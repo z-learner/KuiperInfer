@@ -2,6 +2,8 @@
 # KuiperInfer (自制深度学习推理框架)
 **🙋🙋🙋 全新课程，本项目的进阶版-自制大模型推理框架，火热进行中，请加下方微信了解**。
 
+> 带你从零写一个支持LLama推理，支持Cuda加速的大模型框架
+
 <img src="imgs/me.jpg" width="30%" height="30%">
 
 ![](https://github.com/zjhellofss/kuiperinfer/actions/workflows/cmake.yml/badge.svg)
