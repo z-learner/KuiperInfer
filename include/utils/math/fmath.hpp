@@ -44,10 +44,10 @@
 #define __GNUC_PREREQ(major, minor) \
   ((((__GNUC__) << 16) + (__GNUC_MINOR__)) >= (((major) << 16) + (minor)))
 #endif
-#if __GNUC_PREREQ(4, 4) || (__clang__ > 0 && __clang_major__ >= 3) || !defined(__GNUC__)
+#if (__GNUC_PREREQ(4, 4) || (__clang__ > 0 && __clang_major__ >= 3) || !defined(__GNUC__)) && defined(__AVX__)
 /* GCC >= 4.4 or clang or non-GCC compilers */
 #include <x86intrin.h>
-#elif __GNUC_PREREQ(4, 1)
+#elif __GNUC_PREREQ(4, 1) && defined(__SEE2__) 
 /* GCC 4.1, 4.2, and 4.3 do not have x86intrin.h, directly include SSE2 header
  */
 #include <emmintrin.h>
@@ -210,7 +210,7 @@ struct LogVar {
   }
 };
 
-#ifdef FMATH_USE_XBYAK
+#if  defined(FMATH_USE_XBYAK) && (defined(__SEE2__) || defined(__AVX__))
 struct ExpCode : public Xbyak::CodeGenerator {
   float (*exp_)(float);
   __m128 (*exp_ps_)(__m128);
@@ -425,7 +425,7 @@ inline double expd(double x) {
   if (x >= 709.78271289338397) return std::numeric_limits<double>::infinity();
   using namespace local;
   const ExpdVar<>& c = C<>::expdVar;
-#if 1
+#if defined(__SSE2__)
   const double _b = double(uint64_t(3) << 51);
   __m128d b = _mm_load_sd(&_b);
   __m128d xx = _mm_load_sd(&x);
@@ -460,6 +460,7 @@ inline double expd(double x) {
 #endif
 }
 
+#if defined(__SSE2__) || defined(__AVX__)
 inline __m128d exp_pd(__m128d x) {
 #if 0  // faster on Haswell
 	MIE_ALIGN(16) double buf[2];
@@ -508,6 +509,7 @@ inline __m128d exp_pd(__m128d x) {
 #endif
 }
 
+#endif
 /*
         px : pointer to array of double
         n : size of array
@@ -516,6 +518,9 @@ inline void expd_v(double* px, size_t n) {
   using namespace local;
   const ExpdVar<>& c = C<>::expdVar;
   const double b = double(3ULL << 51);
+
+#if defined(__SSE2__) || defined(__AVX__)
+
 #ifdef __AVX2__
   size_t r = n & 3;
   n &= ~3;
@@ -594,7 +599,16 @@ inline void expd_v(double* px, size_t n) {
   for (size_t i = 0; i < r; i++) {
     px[i] = expd(px[i]);
   }
+
+#else // ARM
+  for (size_t i = 0; i < n; i++) {
+    px[i] = expd(px[i]);
+  }
+#endif
+
 }
+
+#if defined(__SSE2__) || defined(__AVX__)
 
 #ifdef FMATH_USE_XBYAK
 inline __m128 exp_psC(__m128 x)
@@ -657,6 +671,9 @@ inline __m128 exp_ps(__m128 x)
 
   return t;
 }
+
+#endif
+
 #ifdef __AVX2__
 inline __m256 exp_ps256(__m256 x) {
   using namespace local;
@@ -723,6 +740,8 @@ inline float log(float x) {
   return f;
 }
 
+
+#if defined(__SSE2__) || defined(__AVX__)
 inline __m128 log_ps(__m128 x) {
   using namespace local;
   const LogVar<>& logVar = C<>::logVar;
@@ -766,6 +785,7 @@ inline __m128 log_ps(__m128 x) {
   rev = _mm_mul_ps(b2, rev);
   return _mm_add_ps(a, rev);
 }
+#endif
 
 #ifndef __CYGWIN__
 // cygwin defines log2() in global namespace!
@@ -817,7 +837,7 @@ class PowGenerator {
 };
 
 // for Xbyak version
-#ifdef FMATH_USE_XBYAK
+#if defined(FMATH_USE_XBYAK) && (defined(__SEE2__) || defined(__AVX__))
 float (*const exp)(float) = local::C<>::CreateInstance().exp_;
 __m128 (*const exp_ps)(__m128) = local::C<>::CreateInstance().exp_ps_;
 #endif
@@ -828,6 +848,7 @@ inline float exp2(float x) { return fmath::exp(x * 0.6931472f); }
 /*
         this function may be optimized in the future
 */
+#if (defined(__SEE2__) || defined(__AVX__))
 inline __m128d log_pd(__m128d x) {
   double d[2];
   memcpy(d, &x, sizeof(d));
@@ -840,6 +861,7 @@ inline __m128d log_pd(__m128d x) {
 inline __m128 pow_ps(__m128 x, __m128 y) { return exp_ps(_mm_mul_ps(y, log_ps(x))); }
 inline __m128d pow_pd(__m128d x, __m128d y) { return exp_pd(_mm_mul_pd(y, log_pd(x))); }
 
+#endif
 inline void add_ps_vec(const float* arr1, size_t n1, const float* arr2, size_t n2, float* output,
                        size_t n3) {
   assert(n1 == n2 && n2 == n3);

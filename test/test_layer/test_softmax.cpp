@@ -156,7 +156,7 @@ TEST(test_layer, forward_softmax_dim2) {
       for (int i = 0; i < 24; ++i) {
         float a = output->index(i);
         float b = real.at(i);
-        ASSERT_LE(std::abs(a - b), 1e-5f);
+        ASSERT_LE(std::abs(a - b), 1e-5f) << "a: " << a << " b: " << b << " i:" << i;
       }
     }
   }

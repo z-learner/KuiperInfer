@@ -23,6 +23,15 @@ if (MSVC)
     # Force LLVM OpenMP on MSVC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp:llvm /openmp:experimental /arch:AVX2")
 endif ()
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm" OR CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    message(STATUS "Target architecture is ARM.")
+    add_definitions(-D__ARM__)
+    add_compile_options(-Ofast)
+else()
+    message(STATUS "Target architecture is X86/X64.")
+endif()
+
 option(BUILD_DEMO "BUILD THE DEMO PROJECT")
 
 if (BUILD_DEMO)
